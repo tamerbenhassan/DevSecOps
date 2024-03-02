@@ -34,12 +34,19 @@ pipeline {
 
       stage('SonarQube - SAST') {
         steps {
-          sh "mvn sonar:sonar -Dsonar.projectKey=numeric-application -Dsonar.host.url=http://devsecops-tamer.eastus.cloudapp.azure.com:9000 -Dsonar.login=2147a0f118ff39055baf542f86f58a32b4f57ce0"
+          withSonarQubeEnv('SonarQube') {
+            sh "mvn sonar:sonar -Dsonar.projectKey=numeric-application -Dsonar.host.url=http://devsecops-tamer.eastus.cloudapp.azure.com:9000 -Dsonar.login=2147a0f118ff39055baf542f86f58a32b4f57ce0"
+          }
+          timeout(time: 2, unit: 'MINUTES') {
+            script {
+              waitForQualityGate abortPipeline: true
+            }
+          }
         }
       }
 
       stage('Docker Build and Push') {
-            steps {
+            steps { 
               withDockerRegistry([credentialsId: "docker-hub", url: ""]) {
                 sh 'printenv'
                 sh 'docker build -t tamerben/numeric-app:""$GIT_COMMIT"" .'
