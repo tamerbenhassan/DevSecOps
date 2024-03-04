@@ -79,11 +79,18 @@ forbidden_users = [
 ]
 
 deny[msg] {
-    command := "user"
-    users := [name | input[i].Cmd == "user"; name := input[i].Value]
-    lastuser := users[count(users)-1]
-    contains(lower(lastuser[_]), forbidden_users[_])
-    msg = sprintf("Line %d: Last USER directive (USER %s) is forbidden", [i, lastuser])
+    # Find all the user commands and associated users
+    users := {name | input[_].Cmd == "user"; name := input[_].Value}
+    
+    # Get the last user specified in the Dockerfile
+    lastuser := users[count(users) - 1]
+
+    # Check if the last user is one of the forbidden users
+    forbidden := {lower(fu) | fu := forbidden_users[_]}
+    lower(lastuser) == forbidden[_]
+
+    # Construct the message
+    msg = sprintf("The last USER directive (USER %s) is forbidden", [lastuser])
 }
 
 # Do not sudo
