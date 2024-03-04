@@ -41,7 +41,7 @@ deny[msg] {
 deny[msg] {
     input[i].Cmd == "run"
     val := concat(" ", input[i].Value)
-    matches := regex.find_n("(curl|wget)[^|^>]*[|>]", lower(val), -1)
+    matches := regex.find_n(`(curl|wget)[^|^>]*[|>]`, lower(val), -1)
     count(matches) > 0
     msg = sprintf("Line %d: Avoid curl bashing", [i])
 }
@@ -62,12 +62,13 @@ deny[msg] {
 }
 
 # Any user...
-any_user {
+any_user = {name |
     input[i].Cmd == "user"
+    name := input[i].Value
  }
 
 deny[msg] {
-    not any_user
+    not any_user[i]
     msg = "Do not run as root, use USER instead"
 }
 
@@ -79,11 +80,11 @@ forbidden_users = [
 ]
 
 deny[msg] {
-    command := "user"
-    users := [name | input[i].Cmd == "user"; name := input[i].Value]
-    lastuser := users[count(users)-1]
-    contains(lower(lastuser[_]), forbidden_users[_])
-    msg = sprintf("Line %d: Last USER directive (USER %s) is forbidden", [i, lastuser])
+    input[i].Cmd == "user"
+    user := input[i].Value
+    forbidden := {lower(x) | x := forbidden_users[_]}
+    lower(user) == forbidden[_]
+    msg = sprintf("Line %d: Last USER directive (USER %s) is forbidden", [i, user])
 }
 
 # Do not sudo
