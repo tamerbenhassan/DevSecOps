@@ -1,53 +1,34 @@
-# DevSecOps for SpringBoot Application
-### Overview
-This project showcases a DevSecOps pipeline for a SpringBoot application, emphasizing security integration throughout the development lifecycle. Utilizing Jenkins for CI/CD and deploying on Kubernetes clusters hosted on Azure VMs, the project incorporates a broad array of tools and practices to ensure security and compliance from development to production.
+# DevSecOps Pipeline for SpringBoot Application
+This repository is designed to implement DevSecOps practices for a SpringBoot application. The pipeline includes stages for building the application artifact, running unit tests, performing various security checks (SAST, DAST, dependency scanning, etc.), building and pushing a Docker container, deploying to Kubernetes, and conducting post-deployment checks.
 
-# Tools and Technologies
-## Jenkins
-Facilitates automated builds, testing, and deployments, integrating security checks at every step of the CI/CD pipeline.
+## Prerequisites
+* Jenkins with the necessary plugins (including Slack for notifications, Docker, Kubernetes, SonarQube, etc.)
+* Maven for Java application build lifecycle management
+* Docker for containerization
+* Kubernetes for orchestration
+* SonarQube for static application security testing (SAST)
+* Trivy, OWASP ZAP, and other tools for security scanning
+* Access to a Docker registry and Kubernetes cluster
+## Usage
+To use this pipeline:
 
-## Kubernetes on Azure VM
-Provides a scalable and secure environment for deploying containerized applications, leveraging Kubernetes' orchestration capabilities.
-
-## Istio Service Mesh
-Manages, secures, and observes network communications between services, enhancing security and operability within the microservices architecture.
-
-## Kiali
-Offers visibility into the Istio service mesh, providing insights into the microservices' performance, configuration, and security.
-
-## Prometheus & Grafana
-Used for monitoring and visualizing the application's operational and security metrics, aiding in proactive vulnerability management.
-
-## Falco
-Detects and alerts on anomalous activities in real-time, enhancing the security monitoring capabilities within the Kubernetes ecosystem.
-
-## OWASP Zed Attack Proxy (ZAP)
-ZAP is employed for DAST, automatically finding security vulnerabilities in your web applications while you are developing and testing your applications.
-
-## SonarQube
-SonarQube is used for SAST, scrutinizing code quality and security vulnerabilities within the application source code, ensuring adherence to coding standards and security best practices.
-
-## Open Policy Agent (OPA)
-Enforces security policies and best practices across the Kubernetes clusters, ensuring compliance with organizational and regulatory standards.
-
-## Center for Internet Security (CIS) Benchmarking
-Ensures the Kubernetes configuration adheres to CIS benchmarks, promoting a secure and compliant infrastructure setup.
-
-## OWASP
-The project aligns with OWASP Top Ten, integrating practices and tools to safeguard against prevalent web application security threats.
-
-## Trivy, KubeSec, Kube-Bench
-These tools are integral for scanning vulnerabilities in containers, Kubernetes configurations, and ensuring compliance with the CIS Kubernetes Benchmark.
-
-## DevSecOps Practices
-Incorporating advanced practices and tools, this project achieves a high level of security:
-
-### Continuous Security: 
-Integrating security into the continuous integration and deployment processes, ensuring every build is tested for vulnerabilities.
-### Automated Security Scanning: 
-Utilizing ZAP for dynamic analysis and SonarQube for static code analysis, enabling early detection and remediation of vulnerabilities.
-### Policy as Code: 
-Applying OPA to enforce security and operational policies, ensuring consistent compliance across all environments.
-###Compliance and Monitoring: 
-Employing Prometheus, Grafana, and Falco for monitoring, along with CIS benchmarking for infrastructure compliance, maintains high security and operational standards.
-
+* Ensure Jenkins is set up with credentials for Docker Hub, Kubernetes (kubeconfig), and any other services required by the pipeline.
+* Add the Jenkinsfile to your Jenkins instance by creating a new pipeline job and pointing it to this file in your source code repository.
+* Run the pipeline through Jenkins, which will automatically proceed through the stages defined in the Jenkinsfile.
+* Pipeline Stages Explained
+* Build Artifact: Compiles the code and packages it into a JAR file, skipping unit tests for speed.
+* Unit Tests: Runs unit tests to ensure code integrity.
+* Mutation Tests - PIT: Executes mutation testing to assess the quality of the unit tests.
+* SonarQube - SAST: Analyzes the source code with SonarQube for potential security vulnerabilities.
+* Vulnerability Scan - Docker: Performs security scanning on dependencies, Docker images, and Dockerfile configurations.
+* Docker Build and Push: Builds the Docker image and pushes it to Docker Hub, tagging it with the Git commit ID.
+* Vulnerability Scan - Kubernetes: Scans Kubernetes deployment configurations for security issues.
+* K8s Deployment - DEV: Deploys the application to a development environment in Kubernetes and checks the rollout status.
+* Integration Tests - DEV: Runs integration tests in the development environment, with automatic rollback on failure.
+* OWASP ZAP - DAST: Performs dynamic application security testing using OWASP ZAP.
+* Promote to PROD?: Awaits manual approval before promoting the application to the production environment.
+* K8S CIS Benchmark: Runs CIS benchmark checks against Kubernetes components.
+* K8S Deployment - PROD: Deploys the application to the production environment and verifies the deployment status.
+### Post Actions
+* Collects and publishes reports from unit tests, code coverage, mutation testing, and dependency checks.
+* Sends a notification (e.g., via Slack) with the build result.
